@@ -44,3 +44,5 @@
 для нечетного случая (которое стремится к нулю при увеличении числа философов) и исполняются практически параллельно для четного, то есть с waste_time = 0 
 
 ![philo_cycle](./images/8_philo_cycle.jpg)
+
+[philosophers-visualizer](https://nafuka11.github.io/philosophers-visualizer/)
