@@ -6,13 +6,12 @@
 /*   By: rnubia <rnubia@student.21-school.ru>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/07 19:25:22 by rnubia            #+#    #+#             */
-/*   Updated: 2022/07/08 20:31:51 by rnubia           ###   ########.fr       */
+/*   Updated: 2022/07/11 02:23:37 by rnubia           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 #include "philo_bonus.h"
-
 
 long long	time_sub(t_timeval *min, t_timeval *sub)
 {
@@ -47,7 +46,7 @@ t_bool	time_less(t_timeval *time1, t_timeval *time2)
 		return (false);
 }
 
-void	usleep_till(t_timeval *time)
+t_bool	usleep_till(t_timeval *time)
 {
 	t_timeval	current_time;
 
@@ -57,4 +56,5 @@ void	usleep_till(t_timeval *time)
 		usleep(TIMER);
 		gettimeofday(&current_time, NULL);
 	}
+	return (true);
 }

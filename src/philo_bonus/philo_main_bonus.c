@@ -6,14 +6,15 @@
 /*   By: rnubia <rnubia@student.21-school.ru>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/05 09:21:46 by rnubia            #+#    #+#             */
-/*   Updated: 2022/07/10 14:01:33 by rnubia           ###   ########.fr       */
+/*   Updated: 2022/07/11 03:02:52 by rnubia           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <limits.h>
 #include "philo_bonus.h"
-
 
 static t_bool	ft_stoi(char *str, int *inbr)
 {
@@ -70,59 +71,43 @@ static t_bool	check_args(int argc, char **argv, int *args)
 static t_bool	philos_origin(t_exist *exist, t_philo *philo)
 {
 	int	i;
-	i = 0;
+
+	i = -1;
 	gettimeofday(&exist->inception, NULL);
-	while (i < exist->philo_count)
+	while (++ i < exist->philo_count)
 	{
-		exist->(pids + i) = fork();
-		if (exist->(pids + i) == -1)
+		*(exist->pids + i) = fork();
+		if (*(exist->pids + i) == -1)
 		{
-			philo_kill(exist, i - 1);
+			philos_kill(exist, i - 1);
 			existence_destroy(exist);
 			return (false);
 		}
-		if (exist->(pids + i) == 0)
+		if (*(exist->pids + i) == 0)
 		{
 			philo->phid = i + 1;
-			if (philo_init(exist, philo) == false)
+			if (philo_cycle(exist, philo) == false)
 			{
-				philo_kill(exist, i - 1);
+				philos_kill(exist, i - 1);
 				existence_destroy(exist);
 				exit(EXIT_FAILURE);
 			}
 		}
-		i ++;
 	}
 	return (true);
 }
 
-static void	*death_monitor(void *data)
+static void	philos_wait(t_exist *exist)
 {
-	t_philo	*philo;
+	int	status;
+	int	i;
 
-	philo = (t_philo *)data;
-
-	t_timeval	curr_time;
-	int			i;
-
-	i = 0;
-	while (21)
-	{
-		if (check_eatings(exist) == true)
-			break ;
-//		sem_wait(philo->tcheck);
-		gettimeofday(&curr_time, NULL);
-		if (time_less(&(philo + i)->time_to_die, &curr_time) == true)
-		{
-			philo_died(exist, philo + i, &curr_time);
-			break ;
-		}
-//		sem_post(philo->tcheck);
-		i = (i + 1) % exist->philo_count;
-	}
 	i = 0;
 	while (i < exist->philo_count)
-		pthread_join((philo + i ++)->ptid, NULL);
+	{
+		waitpid(*(exist->pids + i), &status, 0);
+		i ++;
+	}
 }
 
 int	main(int argc, char **argv)
@@ -136,9 +121,9 @@ int	main(int argc, char **argv)
 		return (RETURN_FAILURE);
 	if (existence_init(&exist, args) == false)
 		return (RETURN_FAILURE);
-	if (philos_origin(&exist, exist.philos) == false)
+	if (philos_origin(&exist, &philo) == false)
 		return (RETURN_FAILURE);
-	death_monitor(&exist, exist.philos);
+	philos_wait(&exist);
 	existence_destroy(&exist);
 	return (RETURN_SUCCESS);
 }
